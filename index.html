@@ -18,7 +18,6 @@ header p{font-size:.9rem;opacity:.65}
 .filter-group select{padding:8px 32px 8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;color:#1a1a2e;background:#f8fafc;appearance:none;cursor:pointer;min-width:180px}
 .filter-group select:focus{outline:none;border-color:#6366f1}
 .btn-reset{padding:8px 18px;background:#f1f5f9;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.85rem;color:#555;cursor:pointer}
-.btn-reset:hover{background:#e2e8f0}
 .filter-count{font-size:.8rem;color:#6366f1;font-weight:600;align-self:center;margin-left:auto}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
 .kpi-card{background:white;border-radius:12px;padding:22px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-left:4px solid var(--accent)}
@@ -31,7 +30,7 @@ header p{font-size:.9rem;opacity:.65}
 .card{background:white;border-radius:12px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .card h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:20px;font-weight:600}
 footer{text-align:center;padding:20px;color:#bbb;font-size:.78rem}
-@media(max-width:768px){.row-2{grid-template-columns:1fr};header{padding:24px}}
+@media(max-width:768px){.row-2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -68,24 +67,28 @@ const EA=[{name:"Santa Mónica SA",total:393},{name:"Cagnoli S.A.",total:268},{n
 const DBY={"2008":[0,0,4,0,0,5,0,0],"2009":[0,5,30,3,1,25,1,1],"2010":[0,10,60,5,2,65,3,3],"2011":[0,12,70,8,2,75,3,3],"2012":[0,15,80,10,2,90,3,3],"2013":[0,8,50,7,1,50,2,2],"2014":[0,8,50,7,1,55,2,2],"2015":[0,9,55,8,2,60,2,2],"2016":[1,12,70,10,3,80,4,3],"2017":[1,13,70,10,3,82,4,2],"2018":[1,13,72,10,3,84,4,3],"2019":[1,13,70,10,3,85,4,3],"2020":[1,12,65,9,2,83,5,3],"2021":[1,18,100,12,4,120,6,3],"2022":[1,20,110,12,4,135,5,2],"2023":[1,22,115,13,4,130,6,4],"2024":[1,20,105,12,3,125,5,2],"2025":[0,18,100,11,3,115,5,4],"2026":[0,8,40,4,1,45,1,5]};
 const AN=Object.keys(AD);
 const sA=document.getElementById('filtroAnio'),sE=document.getElementById('filtroEmpresa');
-AN.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;sA.appendChild(o)});
-EA.filter(e=>e.name!=='Otras empresas').forEach(e=>{const o=document.createElement('option');o.value=e.name;o.textContent=e.name;sE.appendChild(o)});
+AN.forEach(function(a){var o=document.createElement('option');o.value=a;o.textContent=a;sA.appendChild(o)});
+EA.filter(function(e){return e.name!=='Otras empresas'}).forEach(function(e){var o=document.createElement('option');o.value=e.name;o.textContent=e.name;sE.appendChild(o)});
 sA.onchange=sE.onchange=render;
 function resetFiltros(){sA.value='';sE.value='';render()}
-let ch={};
+var ch={};
 function mkC(id,cfg){if(ch[id])ch[id].destroy();ch[id]=new Chart(document.getElementById(id),cfg)}
 function render(){
-  const af=sA.value,ef=sE.value,aa=af?[af]:AN;
-  let t=0,a=0,f=0,m=[];
-  aa.forEach(x=>{const d=AD[x];t+=d.total;a+=d.activa;f+=d.finalizada;m.push({a:x,v:d.montoAvg})});
-  let sc=1;
-  if(ef){const ed=EA.find(e=>e.name===ef);if(ed){const ta=EA.reduce((s,e)=>s+e.total,0);sc=ed.total/ta;t=Math.round(t*sc);a=Math.round(a*sc);f=Math.round(f*sc)}}
-  let dt=[0,0,0,0,0,0,0,0];
-  aa.forEach(x=>{const d=DBY[x]||[0,0,0,0,0,0,0,0];d.forEach((v,i)=>dt[i]+=v)});
-  if(ef)dt=dt.map(v=>Math.round(v*sc));
-  const dl=["1 mes","2 meses","3 meses","4 meses","5 meses","6 meses","9 meses","12 meses"];
-  const mi=dt.indexOf(Math.max(...dt)),dtt=dt.reduce((a,b)=>a+b,0),dp=dtt>0?Math.round(dt[mi]/dtt*100):0;
-  const lm=m.length?m[m.length-1].v:0,ec=ef?1:(af?Math.round(EA.length*0.6):339);
+  var af=sA.value,ef=sE.value;
+  var aa=af?[af]:AN;
+  var t=0,a=0,f=0,m=[];
+  aa.forEach(function(x){var d=AD[x];t+=d.total;a+=d.activa;f+=d.finalizada;m.push({a:x,v:d.montoAvg})});
+  var sc=1;
+  if(ef){var ed=EA.find(function(e){return e.name===ef});if(ed){var ta=EA.reduce(function(s,e){return s+e.total},0);sc=ed.total/ta;t=Math.round(t*sc);a=Math.round(a*sc);f=Math.round(f*sc)}}
+  var dt=[0,0,0,0,0,0,0,0];
+  aa.forEach(function(x){var d=DBY[x]||[0,0,0,0,0,0,0,0];d.forEach(function(v,i){dt[i]+=v})});
+  if(ef)dt=dt.map(function(v){return Math.round(v*sc)});
+  var dl=["1 mes","2 meses","3 meses","4 meses","5 meses","6 meses","9 meses","12 meses"];
+  var mi=dt.indexOf(Math.max.apply(null,dt));
+  var dtt=dt.reduce(function(a,b){return a+b},0);
+  var dp=dtt>0?Math.round(dt[mi]/dtt*100):0;
+  var lm=m.length?m[m.length-1].v:0;
+  var ec=ef?1:(af?Math.round(EA.length*0.6):339);
   document.getElementById('kpiTotal').textContent=t.toLocaleString('es-AR');
   document.getElementById('kpiActivas').textContent=a.toLocaleString('es-AR');
   document.getElementById('kpiFinalizadas').textContent=f.toLocaleString('es-AR');
@@ -95,13 +98,15 @@ function render(){
   document.getElementById('kpiDurPct').textContent=dp+'% de convenios';
   document.getElementById('kpiMonto').textContent=lm>=1000?'$'+Math.round(lm/1000)+'k':'$'+lm;
   document.getElementById('countLabel').textContent=t.toLocaleString('es-AR')+' registros';
-  const ac=aa.map(x=>{let v=AD[x].total;if(ef)v=Math.round(v*sc);return v});
-  mkC('chartAnual',{type:'bar',data:{labels:aa,datasets:[{label:'Pasantías',data:ac,backgroundColor:aa.map(x=>x>='2026'?'#22c55e':'#0f3460cc'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}}});
-  let ed2=ef?(()=>{const e=EA.find(x=>x.name===ef);return e?[e]:[]})()':(()=>{let d=EA.filter(e=>e.name!=='Otras empresas').slice(0,15);if(af){const s=AD[af].total/3394;d=d.map(e=>({...e,total:Math.max(1,Math.round(e.total*s))}))}return d})();
-  const es=[...ed2].sort((a,b)=>b.total-a.total).slice(0,15);
-  mkC('chartEmpresas',{type:'bar',data:{labels:es.map(e=>e.name),datasets:[{label:'Pasantías',data:es.map(e=>e.total),backgroundColor:'#0f346077',borderColor:'#0f3460',borderWidth:1,borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'#f5f5f5'}},y:{grid:{display:false}}}}});
+  var ac=aa.map(function(x){var v=AD[x].total;if(ef)v=Math.round(v*sc);return v});
+  mkC('chartAnual',{type:'bar',data:{labels:aa,datasets:[{label:'Pasantías',data:ac,backgroundColor:aa.map(function(x){return x>='2026'?'#22c55e':'#0f3460cc'}),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}}});
+  var empData;
+  if(ef){var found=EA.find(function(x){return x.name===ef});empData=found?[found]:[]}
+  else{empData=EA.filter(function(e){return e.name!=='Otras empresas'}).slice(0,15);if(af){var s2=AD[af].total/3394;empData=empData.map(function(e){return{name:e.name,total:Math.max(1,Math.round(e.total*s2))}})}}
+  var es=empData.slice().sort(function(a,b){return b.total-a.total}).slice(0,15);
+  mkC('chartEmpresas',{type:'bar',data:{labels:es.map(function(e){return e.name}),datasets:[{label:'Pasantías',data:es.map(function(e){return e.total}),backgroundColor:'#0f346077',borderColor:'#0f3460',borderWidth:1,borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'#f5f5f5'}},y:{grid:{display:false}}}}});
   mkC('chartDuracion',{type:'doughnut',data:{labels:dl,datasets:[{data:dt,backgroundColor:['#e0e7ff','#a5b4fc','#818cf8','#6366f1','#fbbf24','#f59e0b','#d97706','#0f3460'],borderWidth:2,borderColor:'white'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:14}}}}});
-  mkC('chartMonto',{type:'line',data:{labels:aa,datasets:[{label:'Monto',data:aa.map(x=>AD[x].montoAvg),borderColor:'#ec4899',backgroundColor:'rgba(236,72,153,0.08)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#ec4899'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'},ticks:{callback:v=>v>=1000?'$'+(v/1000).toFixed(0)+'k':'$'+v}},x:{grid:{display:false}}}}});
+  mkC('chartMonto',{type:'line',data:{labels:aa,datasets:[{label:'Monto',data:aa.map(function(x){return AD[x].montoAvg}),borderColor:'#ec4899',backgroundColor:'rgba(236,72,153,0.08)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#ec4899'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'},ticks:{callback:function(v){return v>=1000?'$'+(v/1000).toFixed(0)+'k':'$'+v}}},x:{grid:{display:false}}}}});
 }
 render();
 </script>
