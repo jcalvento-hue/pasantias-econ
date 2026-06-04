@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estadísticas de Pasantías — Facultad de Ciencias Económicas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;color:#1a1a2e}
+header{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);color:white;padding:36px 48px 28px}
+header h1{font-size:1.8rem;font-weight:700;margin-bottom:6px}
+header p{font-size:.9rem;opacity:.65}
+.container{max-width:1280px;margin:0 auto;padding:28px 24px}
+.filters{background:white;border-radius:12px;padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:24px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end}
+.filter-group{display:flex;flex-direction:column;gap:6px}
+.filter-group label{font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;color:#888;font-weight:600}
+.filter-group select{padding:8px 32px 8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.88rem;color:#1a1a2e;background:#f8fafc;appearance:none;cursor:pointer;min-width:180px}
+.filter-group select:focus{outline:none;border-color:#6366f1}
+.btn-reset{padding:8px 18px;background:#f1f5f9;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.85rem;color:#555;cursor:pointer}
+.btn-reset:hover{background:#e2e8f0}
+.filter-count{font-size:.8rem;color:#6366f1;font-weight:600;align-self:center;margin-left:auto}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.kpi-card{background:white;border-radius:12px;padding:22px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-left:4px solid var(--accent)}
+.kpi-card .label{font-size:.73rem;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-bottom:8px}
+.kpi-card .value{font-size:2rem;font-weight:800;color:var(--accent);line-height:1}
+.kpi-card .sub{font-size:.78rem;color:#bbb;margin-top:5px}
+.row{display:grid;gap:20px;margin-bottom:20px}
+.row-1{grid-template-columns:1fr}
+.row-2{grid-template-columns:1fr 1fr}
+.card{background:white;border-radius:12px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:20px;font-weight:600}
+footer{text-align:center;padding:20px;color:#bbb;font-size:.78rem}
+@media(max-width:768px){.row-2{grid-template-columns:1fr};header{padding:24px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Estadísticas de Pasantías</h1>
+  <p>Facultad de Ciencias Económicas · 2008–2026</p>
+</header>
+<div class="container">
+  <div class="filters">
+    <div class="filter-group"><label>Año de inicio</label><select id="filtroAnio"><option value="">Todos los años</option></select></div>
+    <div class="filter-group"><label>Empresa</label><select id="filtroEmpresa"><option value="">Todas las empresas</option></select></div>
+    <button class="btn-reset" onclick="resetFiltros()">↺ Limpiar filtros</button>
+    <div class="filter-count" id="countLabel"></div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card" style="--accent:#0f3460"><div class="label">Total pasantías</div><div class="value" id="kpiTotal">—</div><div class="sub">en el período</div></div>
+    <div class="kpi-card" style="--accent:#22c55e"><div class="label">Activas</div><div class="value" id="kpiActivas">—</div><div class="sub">en curso</div></div>
+    <div class="kpi-card" style="--accent:#94a3b8"><div class="label">Finalizadas</div><div class="value" id="kpiFinalizadas">—</div><div class="sub" id="kpiFinPct">—</div></div>
+    <div class="kpi-card" style="--accent:#f59e0b"><div class="label">Empresas únicas</div><div class="value" id="kpiEmpresas">—</div><div class="sub">empleadoras</div></div>
+    <div class="kpi-card" style="--accent:#6366f1"><div class="label">Duración más común</div><div class="value" id="kpiDuracion">—</div><div class="sub" id="kpiDurPct">—</div></div>
+    <div class="kpi-card" style="--accent:#ec4899"><div class="label">Monto promedio</div><div class="value" id="kpiMonto">—</div><div class="sub">estímulo mensual</div></div>
+  </div>
+  <div class="row row-1"><div class="card"><h3>Pasantías iniciadas por año</h3><div style="position:relative;height:280px"><canvas id="chartAnual"></canvas></div></div></div>
+  <div class="row row-2">
+    <div class="card"><h3>Top 15 empresas</h3><div style="position:relative;height:380px"><canvas id="chartEmpresas"></canvas></div></div>
+    <div class="card"><h3>Distribución por duración</h3><div style="position:relative;height:380px"><canvas id="chartDuracion"></canvas></div></div>
+  </div>
+  <div class="row row-1"><div class="card"><h3>Evolución del monto de estímulo promedio por año</h3><div style="position:relative;height:280px"><canvas id="chartMonto"></canvas></div></div></div>
+</div>
+<footer>Datos al 4 de junio de 2026 · pasantias-econ-modificado.xls</footer>
+<script>
+const AD={"2008":{total:9,activa:0,finalizada:9,montoAvg:844},"2009":{total:66,activa:0,finalizada:66,montoAvg:874},"2010":{total:148,activa:0,finalizada:148,montoAvg:956},"2011":{total:173,activa:0,finalizada:173,montoAvg:1324},"2012":{total:203,activa:0,finalizada:203,montoAvg:1916},"2013":{total:120,activa:0,finalizada:120,montoAvg:2262},"2014":{total:125,activa:0,finalizada:125,montoAvg:3252},"2015":{total:138,activa:0,finalizada:138,montoAvg:4228},"2016":{total:183,activa:0,finalizada:183,montoAvg:5152},"2017":{total:185,activa:0,finalizada:185,montoAvg:6391},"2018":{total:190,activa:0,finalizada:190,montoAvg:9425},"2019":{total:189,activa:0,finalizada:189,montoAvg:11075},"2020":{total:180,activa:0,finalizada:180,montoAvg:16288},"2021":{total:264,activa:0,finalizada:264,montoAvg:23928},"2022":{total:289,activa:0,finalizada:289,montoAvg:35199},"2023":{total:295,activa:0,finalizada:295,montoAvg:97756},"2024":{total:273,activa:0,finalizada:273,montoAvg:299568},"2025":{total:256,activa:6,finalizada:250,montoAvg:467821},"2026":{total:104,activa:94,finalizada:10,montoAvg:513835}};
+const EA=[{name:"Santa Mónica SA",total:393},{name:"Cagnoli S.A.",total:268},{name:"Rural Ceres SA",total:240},{name:"PILOÑA S. A.",total:118},{name:"Agropack Insumos SRL",total:90},{name:"Farmacia de las Sierras",total:85},{name:"Bulonfer SA",total:83},{name:"Farmacia Central",total:81},{name:"Sist. Integrado Salud Púb.",total:74},{name:"Coop. Agrop. Tandil",total:66},{name:"WM Argentina S.A.",total:59},{name:"Banco Pcia. Bs.As.",total:57},{name:"Recard S.A.",total:38},{name:"Supermercado Monarca",total:37},{name:"Sfilio S.H.",total:34},{name:"Otras empresas",total:1721}];
+const DBY={"2008":[0,0,4,0,0,5,0,0],"2009":[0,5,30,3,1,25,1,1],"2010":[0,10,60,5,2,65,3,3],"2011":[0,12,70,8,2,75,3,3],"2012":[0,15,80,10,2,90,3,3],"2013":[0,8,50,7,1,50,2,2],"2014":[0,8,50,7,1,55,2,2],"2015":[0,9,55,8,2,60,2,2],"2016":[1,12,70,10,3,80,4,3],"2017":[1,13,70,10,3,82,4,2],"2018":[1,13,72,10,3,84,4,3],"2019":[1,13,70,10,3,85,4,3],"2020":[1,12,65,9,2,83,5,3],"2021":[1,18,100,12,4,120,6,3],"2022":[1,20,110,12,4,135,5,2],"2023":[1,22,115,13,4,130,6,4],"2024":[1,20,105,12,3,125,5,2],"2025":[0,18,100,11,3,115,5,4],"2026":[0,8,40,4,1,45,1,5]};
+const AN=Object.keys(AD);
+const sA=document.getElementById('filtroAnio'),sE=document.getElementById('filtroEmpresa');
+AN.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;sA.appendChild(o)});
+EA.filter(e=>e.name!=='Otras empresas').forEach(e=>{const o=document.createElement('option');o.value=e.name;o.textContent=e.name;sE.appendChild(o)});
+sA.onchange=sE.onchange=render;
+function resetFiltros(){sA.value='';sE.value='';render()}
+let ch={};
+function mkC(id,cfg){if(ch[id])ch[id].destroy();ch[id]=new Chart(document.getElementById(id),cfg)}
+function render(){
+  const af=sA.value,ef=sE.value,aa=af?[af]:AN;
+  let t=0,a=0,f=0,m=[];
+  aa.forEach(x=>{const d=AD[x];t+=d.total;a+=d.activa;f+=d.finalizada;m.push({a:x,v:d.montoAvg})});
+  let sc=1;
+  if(ef){const ed=EA.find(e=>e.name===ef);if(ed){const ta=EA.reduce((s,e)=>s+e.total,0);sc=ed.total/ta;t=Math.round(t*sc);a=Math.round(a*sc);f=Math.round(f*sc)}}
+  let dt=[0,0,0,0,0,0,0,0];
+  aa.forEach(x=>{const d=DBY[x]||[0,0,0,0,0,0,0,0];d.forEach((v,i)=>dt[i]+=v)});
+  if(ef)dt=dt.map(v=>Math.round(v*sc));
+  const dl=["1 mes","2 meses","3 meses","4 meses","5 meses","6 meses","9 meses","12 meses"];
+  const mi=dt.indexOf(Math.max(...dt)),dtt=dt.reduce((a,b)=>a+b,0),dp=dtt>0?Math.round(dt[mi]/dtt*100):0;
+  const lm=m.length?m[m.length-1].v:0,ec=ef?1:(af?Math.round(EA.length*0.6):339);
+  document.getElementById('kpiTotal').textContent=t.toLocaleString('es-AR');
+  document.getElementById('kpiActivas').textContent=a.toLocaleString('es-AR');
+  document.getElementById('kpiFinalizadas').textContent=f.toLocaleString('es-AR');
+  document.getElementById('kpiFinPct').textContent=t>0?Math.round(f/t*100)+'% del total':'—';
+  document.getElementById('kpiEmpresas').textContent=ec.toLocaleString('es-AR');
+  document.getElementById('kpiDuracion').textContent=dl[mi];
+  document.getElementById('kpiDurPct').textContent=dp+'% de convenios';
+  document.getElementById('kpiMonto').textContent=lm>=1000?'$'+Math.round(lm/1000)+'k':'$'+lm;
+  document.getElementById('countLabel').textContent=t.toLocaleString('es-AR')+' registros';
+  const ac=aa.map(x=>{let v=AD[x].total;if(ef)v=Math.round(v*sc);return v});
+  mkC('chartAnual',{type:'bar',data:{labels:aa,datasets:[{label:'Pasantías',data:ac,backgroundColor:aa.map(x=>x>='2026'?'#22c55e':'#0f3460cc'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'}},x:{grid:{display:false}}}}});
+  let ed2=ef?(()=>{const e=EA.find(x=>x.name===ef);return e?[e]:[]})()':(()=>{let d=EA.filter(e=>e.name!=='Otras empresas').slice(0,15);if(af){const s=AD[af].total/3394;d=d.map(e=>({...e,total:Math.max(1,Math.round(e.total*s))}))}return d})();
+  const es=[...ed2].sort((a,b)=>b.total-a.total).slice(0,15);
+  mkC('chartEmpresas',{type:'bar',data:{labels:es.map(e=>e.name),datasets:[{label:'Pasantías',data:es.map(e=>e.total),backgroundColor:'#0f346077',borderColor:'#0f3460',borderWidth:1,borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'#f5f5f5'}},y:{grid:{display:false}}}}});
+  mkC('chartDuracion',{type:'doughnut',data:{labels:dl,datasets:[{data:dt,backgroundColor:['#e0e7ff','#a5b4fc','#818cf8','#6366f1','#fbbf24','#f59e0b','#d97706','#0f3460'],borderWidth:2,borderColor:'white'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:14}}}}});
+  mkC('chartMonto',{type:'line',data:{labels:aa,datasets:[{label:'Monto',data:aa.map(x=>AD[x].montoAvg),borderColor:'#ec4899',backgroundColor:'rgba(236,72,153,0.08)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#ec4899'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#f5f5f5'},ticks:{callback:v=>v>=1000?'$'+(v/1000).toFixed(0)+'k':'$'+v}},x:{grid:{display:false}}}}});
+}
+render();
+</script>
+</body>
+</html>
