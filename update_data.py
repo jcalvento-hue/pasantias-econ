@@ -2,9 +2,8 @@ import requests
 import re
 import json
 from collections import Counter
-
 FILE_ID = '1DpKK-YplfAcW9dWkeElaJQY_xWasnCfq'
-DOWNLOAD_URL = f'https://drive.google.com/uc?export=download&id={FILE_ID}'
+DOWNLOAD_URL = 'https://drive.usercontent.google.com/download?id=' + FILE_ID + '&export=download&confirm=t'
 
 print('Downloading Excel...')
 r = requests.get(DOWNLOAD_URL, allow_redirects=True)
