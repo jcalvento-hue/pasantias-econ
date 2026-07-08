@@ -161,7 +161,8 @@ new_block = f'const AD={ad_str};\nconst EA={ea_str};\nconst DBY={dby_str};'
 
 with open('index.html', 'r', encoding='utf-8') as f:
     html = f.read()
-html, n_subs = re.subn(r'const AD=\{[\s\S]*?\};[\s]*const EA=[\s\S]*?\};[\s]*const DBY=\{[\s\S]*?\};', new_block, html)
+pattern = r'const\s+AD\s*=\s*\{[\s\S]*?\}\s*;\s*const\s+EA\s*=\s*\[[\s\S]*?\]\s*;\s*const\s+DBY\s*=\s*\{[\s\S]*?\}\s*;'
+html, n_subs = re.subn(pattern, new_block, html)
 if n_subs == 0:
     raise SystemExit('No se encontro el bloque const AD/EA/DBY en index.html — no se modifico nada.')
 with open('index.html', 'w', encoding='utf-8') as f:
